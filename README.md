@@ -9,6 +9,14 @@ This is in-line with the goals of [Ranch][ranch]
 or [barrel][barrel], with the implementations written in
 Elixir as opposed to Erlang.
 
+## Hey, Listen!
+
+This isn't ready to be used! I'm hoping for the best,
+but don't expect a working version to come out of the
+next few commit. I expect this to be an involved
+process to get something that works properly and
+efficiently.
+
 ## TODO
 
 - Listener

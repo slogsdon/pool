@@ -29,6 +29,8 @@ defmodule Pool.Mixfile do
   defp description do
     """
     Socket acceptor pool
+
+    Not ready for use at this time.
     """
   end
 
