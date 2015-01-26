@@ -9,7 +9,6 @@ defmodule Pool.Acceptor do
   @type opts      :: Keyword.t
   @type socket    :: :inet.socket
   @type listener  :: pid
-  @type ref       :: atom
   @type transport :: atom
   @type protocol  :: {atom, opts}
   
@@ -33,9 +32,10 @@ defmodule Pool.Acceptor do
   @doc """
   Accepts on the socket until a client connects.
   """
-  @spec accept(socket, listener, ref, transport, protocol, opts) :: no_return
-  def accept(socket, listener, ref, transport, {protocol, p_opts}, opts \\ []) do
+  @spec accept(socket, listener, transport, protocol, opts) :: no_return
+  def accept(socket, listener, transport, {protocol, p_opts}, opts \\ []) do
     timeout = opts[:accept_timeout] || :infinity
+    ref = opts[:ref]
 
     case transport.accept(socket, timeout) do
       {:ok, socket} ->
@@ -45,9 +45,9 @@ defmodule Pool.Acceptor do
           _ ->
             :ok
         end
-        accept(socket, listener, ref, transport, {protocol, p_opts}, opts)
+        accept(socket, listener, transport, {protocol, p_opts}, opts)
       {:error, reason} when reason in [:timeout, :econnaborted] ->
-        accept(socket, listener, ref, transport, {protocol, p_opts}, opts)
+        accept(socket, listener, transport, {protocol, p_opts}, opts)
       {:error, reason} ->
         exit({:error, reason})
     end
