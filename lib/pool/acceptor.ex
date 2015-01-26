@@ -39,7 +39,7 @@ defmodule Pool.Acceptor do
 
     case transport.accept(socket, timeout) do
       {:ok, socket} ->
-        case protocol.start_link(ref, transport, socket, p_opts) do
+        case protocol.start_link(ref, socket, transport, p_opts) do
           {:ok, pid} ->
             :ok = transport.controlling_process(socket, pid)
           _ ->
