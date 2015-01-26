@@ -30,13 +30,14 @@ defmodule Pool do
   """
   @spec start_listener(atom, integer, any, any, any, any, any) :: {:ok, pid}
                                                                | {:error, term}
-  def start_listener(ref, num_acceptors, transport, t_opts, protocol, p_opts, l_opts) do
+  def start_listener(ref, num_acceptors, transport, t_opts, protocol, p_opts \\ [], l_opts \\ []) do
     _ = Code.ensure_loaded(transport)
 
     l_opts = [{:ref, ref} | l_opts]
     socket = t_opts[:socket]
     spec = child_spec(ref, [num_acceptors, transport, t_opts,
                             protocol, p_opts, l_opts])
+
     case Supervisor.start_child(Pool.Supervisor, spec) do
       {:ok, pid} when socket != nil ->
         transport.controlling_process(socket, pid)

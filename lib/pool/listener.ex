@@ -5,6 +5,13 @@ defmodule Pool.Listener do
   """
   use GenServer
 
+  @type init_list :: [pos_integer |
+                       [atom |
+                         [Keyword.t |
+                           [atom |
+                             [Keyword.t |
+                               [Keyword.t]]]]]]
+
   defmodule State do
     @moduledoc false
     defstruct socket: nil,
@@ -22,27 +29,13 @@ defmodule Pool.Listener do
   Inits the listener's state, creating the
   pool of acceptor processes as well.
   """
-  @spec init(list) :: {:ok, term}
+  @spec init(init_list) :: {:ok, term}
   def init([num_acceptors, transport, t_opts, protocol, p_opts, l_opts]) do
     Process.flag(:trap_exit, true)
-
-    socket = case t_opts[:socket] do
-               nil ->
-                 {:ok, sock} = transport.listen(t_opts[:port], t_opts)
-                 sock
-               sock ->
-                 sock
-             end
-
-    acceptors = for _ <- 1..num_acceptors do
-                  Pool.Acceptor.start_link(
-                    socket,
-                    self,
-                    transport,
-                    {protocol, p_opts},
-                    l_opts
-                  )
-                end
+    socket = get_socket(transport, t_opts)
+    acceptors = start_acceptors(num_acceptors, socket,
+                                transport, protocol, p_opts,
+                                l_opts)
 
     {:ok, %State{ socket: socket,
                   transport: transport,
@@ -59,7 +52,7 @@ defmodule Pool.Listener do
   On successful start of the listener, send the `pid`
   and `ref` to be tracked by `Pool.Server`.
   """
-  @spec start_link(list) :: {:ok, pid}
+  @spec start_link(init_list) :: {:ok, pid}
                           | {:error, any}
   def start_link([_, _, _, _, _, l_opts] = opts) do
     ref = l_opts[:ref]
@@ -69,6 +62,28 @@ defmodule Pool.Listener do
         {:ok, pid}
       otherwise ->
         otherwise
+    end
+  end
+
+  defp get_socket(transport, opts) do
+    case opts[:socket] do
+      nil ->
+        {:ok, sock} = transport.listen(opts[:port], opts)
+        sock
+      sock ->
+        sock
+    end
+  end
+
+  defp start_acceptors(num_acceptors, socket, transport, protocol, p_opts, l_opts) do
+    for _ <- 1..num_acceptors do
+      Pool.Acceptor.start_link(
+        socket,
+        self,
+        transport,
+        {protocol, p_opts},
+        l_opts
+      )
     end
   end
 end
