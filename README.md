@@ -34,12 +34,16 @@ efficiently.
   Transport returns the listening socket.
 - Creates a list of acceptors for handling
   connections.
+- There's one of these per one running
+  protocol.
 
 ### Acceptor
 
 - Utilizes protocol to handle connection.
 - Should message listener on start/end of
   accepting connection.
+- There are many of these per one running
+  protocol.
 
 ### Protocol
 
