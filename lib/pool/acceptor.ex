@@ -5,7 +5,6 @@ defmodule Pool.Acceptor do
   or the process is killed.
   """
   use GenServer
-  require Logger
 
   @type opts      :: Keyword.t
   @type socket    :: :inet.socket
@@ -19,7 +18,6 @@ defmodule Pool.Acceptor do
   """
   @spec start_link(socket, listener, transport, protocol, opts) :: pid
   def start_link(socket, listener, transport, protocol, l_opts \\ []) do
-    Logger.debug("spawning link to accept/2")
     spawn_link(
       __MODULE__,
       :accept,
@@ -39,24 +37,21 @@ defmodule Pool.Acceptor do
     timeout = opts[:accept_timeout] || :infinity
     ref = opts[:ref]
 
-    Logger.debug("attempting to accept on socket #{inspect socket}")
     case transport.accept(socket, timeout) do
       {:ok, sock} when true ->
         protocol.init(ref, sock, transport, p_opts)
       {:ok, sock} ->
+        # TODO: fix this. doesn't keep connection open
         case protocol.start_link(ref, sock, transport, p_opts) do
           {:ok, pid} ->
-            Logger.debug("accepting on #{inspect pid}")
             :ok = transport.controlling_process(sock, pid)
           _ ->
             :ok
         end
         accept(socket, listener, transport, {protocol, p_opts}, opts)
       {:error, reason} when reason in [:timeout, :econnaborted] ->
-        Logger.debug("re-accepting")
         accept(socket, listener, transport, {protocol, p_opts}, opts)
       {:error, reason} ->
-        Logger.debug("cannot accept: #{reason}")
         exit({:error, reason})
     end
   end

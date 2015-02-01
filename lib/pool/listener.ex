@@ -4,7 +4,6 @@ defmodule Pool.Listener do
   active listening socket from a transport.
   """
   use GenServer
-  require Logger
 
   @type init_list :: [pos_integer |
                        [atom |
@@ -32,7 +31,6 @@ defmodule Pool.Listener do
   """
   @spec init(init_list) :: {:ok, term}
   def init([num_acceptors, transport, t_opts, protocol, p_opts, l_opts]) do
-    Logger.debug("initting listener for #{l_opts[:ref]}")
     Process.flag(:trap_exit, true)
     socket = get_socket(transport, t_opts)
     acceptors = start_acceptors(num_acceptors, socket,
@@ -58,7 +56,6 @@ defmodule Pool.Listener do
                           | {:error, any}
   def start_link([_, _, _, _, _, l_opts] = opts) do
     ref = l_opts[:ref]
-    Logger.debug("starting GenServer for #{ref} listener")
     case GenServer.start_link(__MODULE__, opts, name: ref) do
       {:ok, pid} ->
         :ok = Pool.Server.set_listener(ref, pid)
@@ -69,7 +66,6 @@ defmodule Pool.Listener do
   end
 
   defp get_socket(transport, opts) do
-    Logger.debug("getting socket for #{transport}")
     case opts[:socket] do
       nil ->
         {:ok, sock} = transport.listen(opts[:port], opts)
@@ -80,7 +76,6 @@ defmodule Pool.Listener do
   end
 
   defp start_acceptors(num_acceptors, socket, transport, protocol, p_opts, l_opts) do
-    Logger.debug("starting #{num_acceptors} acceptors for #{inspect socket}")
     for _ <- 1..num_acceptors do
       Pool.Acceptor.start_link(
         socket,
