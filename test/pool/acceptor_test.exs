@@ -21,6 +21,22 @@ defmodule Pool.AcceptorTest do
     assert sent == :ok
   end
 
+  test "accept/5 with spawn" do
+    {:ok, listen} = :gen_tcp.listen(0, @tcp_opts)
+    pid = Acceptor.start_link(listen, nil, Tcp, {EchoProtocol, []}, ref: :test_accept,
+                                                                    spawn: true)
+    {:ok, port} = :inet.port(listen)
+
+    assert pid |> is_pid
+    assert pid |> Process.alive?
+
+    {:ok, socket} = :gen_tcp.connect({127,0,0,1}, port, @tcp_opts)
+    sent = :gen_tcp.send(socket, "Hi")
+
+    assert pid |> Process.alive?
+    assert sent == :ok
+  end
+
   test "accept/5 with timeout" do
     {:ok, listen} = :gen_tcp.listen(0, @tcp_opts)
     pid = Acceptor.start_link(listen, nil, Tcp, {EchoProtocol, []}, ref: :test_accept,

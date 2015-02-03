@@ -36,9 +36,10 @@ defmodule Pool.Acceptor do
   def accept(socket, listener, transport, {protocol, p_opts}, opts \\ []) do
     timeout = opts[:accept_timeout] || :infinity
     ref = opts[:ref]
+    spawn = opts[:spawn] || false
 
     case transport.accept(socket, timeout) do
-      {:ok, sock} when true ->
+      {:ok, sock} when spawn == false ->
         protocol.init(ref, sock, transport, p_opts)
       {:ok, sock} ->
         # TODO: fix this. doesn't keep connection open
