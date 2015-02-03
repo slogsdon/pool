@@ -58,7 +58,7 @@ defmodule Pool.Listener do
     ref = l_opts[:ref]
     case GenServer.start_link(__MODULE__, opts, name: ref) do
       {:ok, pid} ->
-        :ok = Pool.Server.set_listener(ref, pid)
+        {:ok, _} = Pool.Server.set_listener(ref, pid)
         {:ok, pid}
       otherwise ->
         otherwise
