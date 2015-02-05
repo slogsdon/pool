@@ -30,13 +30,13 @@ defmodule Pool.Server do
 
   `:ok`
   """
-  @spec set_listener(ref, pid) :: {:ok, bool}
+  @spec set_listener(ref, pid) :: {:ok, boolean}
   def set_listener(ref, pid) do
     {:ok, GenServer.call(__MODULE__, {:set_listener, ref, pid})}
   end
 
   @doc """
-  Gets a listener `pid` by a given `ref`. 
+  Gets a listener `pid` by a given `ref`.
 
   ## Arguments
 
