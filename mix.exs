@@ -3,7 +3,7 @@ defmodule Pool.Mixfile do
 
   def project do
     [ app: :pool,
-      version: "0.0.1",
+      version: "0.0.2",
       elixir: "~> 1.0",
       name: "Pool",
       source_url: "https://github.com/slogsdon/pool",
