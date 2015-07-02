@@ -1,13 +1,12 @@
-defmodule Pool.Transport.Tcp do
+defmodule Pool.Transport.TCP do
+  @moduledoc """
+  Implements the `Pool.Socket` protocol TCP connections.
+  """
+  defstruct socket: nil
+end
+
+defimpl Pool.Socket, for: Pool.Transport.TCP do
   import Pool.Util
-
-  @behaviour Pool.Transport
-
-  @type port_number :: non_neg_integer
-  @type opts        :: Keyword.t
-  @type socket      :: :inet.socket
-  @type packet      :: term
-  @type length      :: non_neg_integer
 
   @default_opts [ binary: true,
                   backlog: 1024,
@@ -16,43 +15,36 @@ defmodule Pool.Transport.Tcp do
                   reuseaddr: true,
                   nodelay: true ]
 
-  @spec name :: atom
-  def name do
-    __MODULE__
-  end
-
-  @spec listen(port_number, opts) :: {:ok, socket}
-  def listen(port, opts) do
-    :gen_tcp.listen(port, @default_opts
+  def listen(socket, port, opts) do
+    case :gen_tcp.listen(port, @default_opts
                             |> Keyword.merge(opts)
+                            |> Keyword.delete(:ref)
                             |> translate_opts
-                            |> fix_ip)
+                            |> fix_ip) do
+      {:ok, sock} ->
+        %{ socket | socket: sock}
+      otherwise ->
+        otherwise
+    end
   end
 
-  @spec accept(socket, timeout) :: {:ok, socket}
-                                 | {:error, any}
-  def accept(socket, timeout) do
+  def accept(%{socket: socket}, timeout) do
     :gen_tcp.accept(socket, timeout)
   end
 
-  @spec close(socket) :: :ok
-  def close(socket) do
+  def close(%{socket: socket}) do
     :gen_tcp.close(socket)
   end
 
-  @spec send(socket, packet) :: :ok | {:error, atom}
-  def send(socket, packet) do
+  def send(%{socket: socket}, packet) do
     :gen_tcp.send(socket, packet)
   end
 
-  @spec receive(socket, length, timeout) :: {:ok, any}
-                                          | {:error, atom}
-  def receive(socket, length, timeout) do
+  def receive(%{socket: socket}, length, timeout) do
     :gen_tcp.recv(socket, length, timeout)
   end
 
-  @spec controlling_process(socket, pid) :: :ok | {:error, atom}
-  def controlling_process(socket, pid) do
+  def controlling_process(%{socket: socket}, pid) do
     :gen_tcp.controlling_process(socket, pid)
   end
 
