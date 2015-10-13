@@ -4,17 +4,14 @@ defprotocol Pool.Handler do
   implement for interacting with sockets.
   """
 
-  @type ref       :: atom
-  @type socket    :: :inet.socket
-  @type transport :: atom
-  @type opts      :: Keyword.t
+  alias Pool.Socket
 
   @doc """
   Should spawn a link to `init/4` and return the
   link's PID.
   """
-  @spec start_link(ref, socket, transport, opts) :: {:ok, pid}
-  def start_link(ref, socket, transport, opts)
+  @spec start_link(t, Socket.t) :: {:ok, pid}
+  def start_link(handler, socket)
 
   @doc """
   Should kick off a loop to wait for data. On
@@ -22,6 +19,6 @@ defprotocol Pool.Handler do
   and wait for more. When applicable, a response
   should be sent.
   """
-  @spec init(ref, socket, transport, opts) :: :ok
-  def init(ref, socket, transport, opts)
+  @spec init(t, Socket.t) :: :ok
+  def init(handler, socket)
 end

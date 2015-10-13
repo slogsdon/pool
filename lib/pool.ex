@@ -8,10 +8,11 @@ defmodule Pool do
     Supervisor.start_link([], opts)
   end
 
-  def start_listener(_transport, _opts \\ []) do
+  def new(transport, opts \\ []) do
     import Supervisor.Spec, warn: false
 
-    args = []
+    opts = opts |> Keyword.put_new(:ref, transport)
+    args = [transport, opts]
 
     spec = supervisor(Pool.Listener, args)
     Supervisor.start_child(Pool.Supervisor, spec)

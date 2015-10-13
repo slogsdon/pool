@@ -6,7 +6,6 @@ defprotocol Pool.Socket do
 
   @type port_number :: non_neg_integer
   @type opts        :: Keyword.t
-  @type socket      :: Map.t
   @type length      :: non_neg_integer
   @type packet      :: any
 
@@ -38,8 +37,8 @@ defprotocol Pool.Socket do
 
   The returned socket `socket` can only be used in calls to `accept/2`.
   """
-  @spec listen(socket, port_number, opts) :: {:ok, socket}
-  def listen(socket, port_number, opts)
+  @spec listen(t) :: {:ok, t}
+  def listen(socket)
 
   @doc """
   Accepts an incoming connection request on a listen socket. `socket` must be a
@@ -60,20 +59,20 @@ defprotocol Pool.Socket do
   unless `{:active, false}` was specified in the option list for the listen
   socket, in which case packets are retrieved by calling `receive/2`.
   """
-  @spec accept(socket, timeout) :: {:ok, socket}
-                                 | {:error, any}
+  @spec accept(t, timeout) :: {:ok, t}
+                            | {:error, any}
   def accept(socket, timeout)
 
   @doc """
   Closes a socket.
   """
-  @spec close(socket) :: :ok
+  @spec close(t) :: :ok
   def close(socket)
 
   @doc """
   Sends a `packet` on a `socket`.
   """
-  @spec send(socket, packet) :: :ok | {:error, atom}
+  @spec send(t, packet) :: :ok | {:error, atom}
   def send(socket, packet)
 
   @doc """
@@ -89,8 +88,8 @@ defprotocol Pool.Socket do
   The optional `timeout` parameter specifies a timeout in milliseconds. The
   default value is `:infinity`.
   """
-  @spec receive(socket, length, timeout) :: {:ok, any}
-                                          | {:error, atom}
+  @spec receive(t, length, timeout) :: {:ok, any}
+                                     | {:error, atom}
   def receive(socket, length, timeout)
 
   @doc """
@@ -99,6 +98,6 @@ defprotocol Pool.Socket do
   process than the current controlling process, `{:error, :not_owner}` is
   returned.
   """
-  @spec controlling_process(socket, pid) :: :ok | {:error, atom}
+  @spec controlling_process(t, pid) :: :ok | {:error, atom}
   def controlling_process(socket, pid)
 end
